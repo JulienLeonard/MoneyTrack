@@ -24,11 +24,17 @@ class CurrencyChange(ndb.Model):
     value           = ndb.StringProperty(indexed=False)
     date            = ndb.DateTimeProperty(auto_now_add=True)
 
-class AccountUpdate(ndb.Model):
+class MoneyMove(ndb.Model):
     """A main model for representing an account update."""
     accountname   = ndb.StringProperty(indexed=True)
+    categoryname  = ndb.StringProperty(indexed=True)
     value         = ndb.StringProperty(indexed=False)
     date          = ndb.DateTimeProperty(auto_now_add=True)
+
+class MoneyMoveCategory(ndb.Model):
+    """A main model for representing a money move category."""
+    name   = ndb.StringProperty(indexed=True)
+    
     
     
     

@@ -20,6 +20,8 @@ from htmlutils     import *
 from modelutils    import *
 from timeutils     import *
 from admin         import *
+from accounts      import *
+from currencies    import *
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -32,14 +34,14 @@ class MainHandler(webapp2.RequestHandler):
             url_linktext = 'Login'
             content.append(htmllink(url,url_linktext))
         else:
-            if not user.email() in emails:
+            if not user.email() in myemails():
                 content.append(html("h1","Not Authorized"))
             else:
                 content.append(html("h1","Money Track"))
                 content.append("Now is " + date2string(localnow()))
-                content.append(htmltable(htmlrow([buttonformget("/addexpense","Add Expense")])))
+                content.append(htmltable(htmlrow([buttonformget("/addexpense","New Expense")])))
                 content.append("<hr>")
-                content.append(htmltable(htmlrow([buttonformget("/listaccounts","Accounts"),buttonformget("/logs","Logs"),buttonformget("/export","Exports")])))
+                content.append(htmltable(htmlrow([buttonformget("/listcurrencies","Currencies"),buttonformget("/listaccounts","Accounts"),buttonformget("/logs","Logs"),buttonformget("/export","Exports")])))
                 
             content.append("<hr>")
             url_linktext = 'Logout'
@@ -49,6 +51,4 @@ class MainHandler(webapp2.RequestHandler):
         writehtmlresponse(self,content)
 
         
-app = webapp2.WSGIApplication([
-    ('/', MainHandler)
-], debug=True)
+app = webapp2.WSGIApplication([('/', MainHandler)] + currencyhandlers() + accounthandlers(), debug=True)
