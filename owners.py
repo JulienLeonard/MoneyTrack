@@ -3,7 +3,7 @@ from google.appengine.ext import ndb
 
 import webapp2
 
-from currencytemplates import *
+from ownertemplates    import *
 from mydicts           import *
 from myschemas         import *
 from modelutils        import *
@@ -12,37 +12,37 @@ from utils             import *
 from timeutils         import *
 from admin             import *
 
-def currencyhandlers():
-    # return [('/listcurrencys',       ListCurrencys),
-    #         ('/mylistcurrencys/(.*)',MyListCurrencys),
-    #         ('/addcurrency',         AddCurrency),
-    #         ('/doaddcurrency',       DoAddCurrency),
-    #         ('/mydoaddcurrency/(.*)',MyDoAddCurrency)]
-    return [('/listcurrencies',       ListCurrencys),
-            ('/addcurrency',         AddCurrency),
-            ('/doaddcurrency',       DoAddCurrency)]
+def ownerhandlers():
+    # return [('/listowners',       ListOwners),
+    #         ('/mylistowners/(.*)',MyListOwners),
+    #         ('/addowner',         AddOwner),
+    #         ('/doaddowner',       DoAddOwner),
+    #         ('/mydoaddowner/(.*)',MyDoAddOwner)]
+    return [('/listowners',       ListOwners),
+            ('/addowner',         AddOwner),
+            ('/doaddowner',       DoAddOwner)]
 
-def addcurrency(request,name):
+def addowner(request,name):
     dict_name = request.request.get('dict_name', USERDICT)
-    ocurrency = Currency(parent=dict_key(dict_name))
-    ocurrency.name         = name
-    ocurrency.put()
-    return ocurrency
+    oowner = Owner(parent=dict_key(dict_name))
+    oowner.name         = name
+    oowner.put()
+    return oowner
                 
     
-# [START ListCurrency]
-class ListCurrencys(webapp2.RequestHandler):
+# [START ListOwner]
+class ListOwners(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         content = []
         if user:
             if user.email() in myemails():
-                content.append(html("h1","Currencies"))
+                content.append(html("h1","Account Owners"))
                 content.append("<hr>")
-                rows = [[currency.name,buttonformget("/viewcurrency/" + currency.key.urlsafe(),"View")] for currency in getallcurrencys(self)]
+                rows = [[owner.name,buttonformget("/viewowner/" + owner.key.urlsafe(),"View")] for owner in getallowners(self)]
                 content.append(htmltable(htmlrows(rows)))
                 content.append("<hr>")
-                content.append(htmltable(htmlrow([buttonformget("/addcurrency","Add"),buttonformget("/","Home")])))
+                content.append(htmltable(htmlrow([buttonformget("/addowner","Add"),buttonformget("/","Home")])))
                 content.append("<hr>")
             else:
                 content = ['Not Authorized']
@@ -56,13 +56,13 @@ class ListCurrencys(webapp2.RequestHandler):
         writehtmlresponse(self,htmlcenter(content))
 
 # [START AddGeneration]
-class AddCurrency(webapp2.RequestHandler):
+class AddOwner(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         content = []
         if user:
             if user.email() in myemails():
-                content.append(ADD_CURRENCY_TEMPLATE)
+                content.append(ADD_OWNER_TEMPLATE)
             else:
                 content = ['Not Authorized']
                 url_linktext = 'Logout'
@@ -76,11 +76,11 @@ class AddCurrency(webapp2.RequestHandler):
 
 # [END AddGeneration]
 
-# [START DoAddCurrency]
-class DoAddCurrency(webapp2.RequestHandler):
+# [START DoAddOwner]
+class DoAddOwner(webapp2.RequestHandler):
     def post(self):
-        currencyname         = self.request.get('currencyname')
-        currency = addcurrency(self,currencyname)
-        self.redirect("/listcurrencies")
+        ownername         = self.request.get('ownername')
+        owner = addowner(self,ownername)
+        self.redirect("/listowners")
 # [END DoAddChiChar]
 

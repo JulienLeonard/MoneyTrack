@@ -18,12 +18,26 @@ ADD_ACCOUNT_TEMPLATE = """\
             <td>Currency</td>
             <td><div><select name="accountcurrency"     >%HTMLCUR%</select></div></td>
          </tr>
+         <tr>
+            <td>Owner</td>
+            <td><div><select name="accountowner"     >%HTMLOWNER%</select></div></td>
+         </tr>
       </table>
-      <hr>
       <div><input type="submit" value="Add"></div>
     </form>
     <hr>
+    <table>
+    <tr>
+    <td>
     <form action="/listaccounts" method="get">
       <div><input type="submit" value="List"></div>
     </form>
+    </td>
+    <td>
+    <form action="/" method="get">
+      <div><input type="submit" value="Home"></div>
+    </form>
+    </td>
+    <tr>
+    </table>
 """

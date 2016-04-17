@@ -10,3 +10,7 @@ def getallaccounts(request):
 def getallcurrencys(request):
     dict_name = request.request.get('dict_name', USERDICT)
     return Currency.query(ancestor=dict_key(dict_name))
+
+def getallowners(request):
+    dict_name = request.request.get('dict_name', USERDICT)
+    return Owner.query(ancestor=dict_key(dict_name))

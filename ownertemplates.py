@@ -1,14 +1,14 @@
-ADD_CURRENCY_TEMPLATE = """\
+ADD_OWNER_TEMPLATE = """\
 <head>
   <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
 </head>
-    <h1>Add Currency</h1>
+    <h1>Add Owner</h1>
     <hr>
-    <form action="/doaddcurrency" method="post">
+    <form action="/doaddowner" method="post">
       <table>
       <tr>
       <td>Name</td>
-      <td><div><textarea name="currencyname"         rows="1" cols="40"></textarea></div></td>
+      <td><div><textarea name="ownername"         rows="1" cols="40"></textarea></div></td>
       </tr>
       </table>
       <hr>
@@ -18,7 +18,7 @@ ADD_CURRENCY_TEMPLATE = """\
     <table>
     <tr>
     <td>
-    <form action="/listcurrencies" method="get">
+    <form action="/listowners" method="get">
       <div><input type="submit" value="List"></div>
     </form>
     </td>

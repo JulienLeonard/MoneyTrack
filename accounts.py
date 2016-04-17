@@ -22,12 +22,13 @@ def accounthandlers():
             ('/addaccount',         AddAccount),
             ('/doaddaccount',       DoAddAccount)]
 
-def addaccount(request,name,description,currencyname):
+def addaccount(request,name,description,currencyname,ownername):
     dict_name = request.request.get('dict_name', USERDICT)
     oaccount = Account(parent=dict_key(dict_name))
     oaccount.name         = name
     oaccount.description  = description
     oaccount.currencyname = currencyname
+    oaccount.ownername = ownername
     oaccount.put()
     return oaccount
                 
@@ -41,7 +42,7 @@ class ListAccounts(webapp2.RequestHandler):
             if user.email() in myemails():
                 content.append(html("h1","Accounts"))
                 content.append("<hr>")
-                rows = [[account.name,account.description,account.currencyname,buttonformget("/viewaccount/" + account.key.urlsafe(),"View")] for account in getallaccounts(self)]
+                rows = [[account.name,account.description,account.currencyname,account.ownername,buttonformget("/viewaccount/" + account.key.urlsafe(),"View")] for account in getallaccounts(self)]
                 content.append(htmltable(htmlrows(rows)))
                 content.append("<hr>")
                 content.append(htmltable(htmlrow([buttonformget("/addaccount","Add"),buttonformget("/","Home")])))
@@ -56,7 +57,7 @@ class ListAccounts(webapp2.RequestHandler):
             url_linktext = 'Login'
             content.append(htmllink(url,url_linktext))
         
-        writehtmlresponse(self,content)
+        writehtmlresponse(self,htmlcenter(content))
 
 # [START AddGeneration]
 class AddAccount(webapp2.RequestHandler):
@@ -79,7 +80,7 @@ class AddAccount(webapp2.RequestHandler):
             url_linktext = 'Login'
             content.append(htmllink(url,url_linktext))
 
-        writehtmlresponse(self,content)
+        writehtmlresponse(self,htmlcenter(content))
 
 # [END AddGeneration]
 
@@ -89,7 +90,8 @@ class DoAddAccount(webapp2.RequestHandler):
         accountname         = self.request.get('accountname')
         accountdescription  = self.request.get('accountdescription')
         accountcurrency     = self.request.get('accountcurrency')
-        account = addaccount(self,accountname,accountdescription,accountcurrency)
+        accountowner     = self.request.get('accountowner')
+        account = addaccount(self,accountname,accountdescription,accountcurrency,accountowner)
         self.redirect("/listaccounts")
 # [END DoAddChiChar]
 
