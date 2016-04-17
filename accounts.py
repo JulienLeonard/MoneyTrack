@@ -3,6 +3,7 @@ from google.appengine.ext import ndb
 
 import webapp2
 
+from accounttemplates import *
 from mydicts          import *
 from myschemas        import *
 from modelutils       import *
@@ -22,13 +23,12 @@ def accounthandlers():
             ('/doaddaccount',       DoAddAccount)]
 
 def addaccount(request,name,description,currencyname):
-    if email:
-        dict_name = request.request.get('dict_name', USERDICT)
-        oaccount = Account(parent=dict_key(dict_name))
-        oaccount.name         = name
-        oaccount.description  = description
-        oaccount.currencyname = currencyname
-        oaccount.put()
+    dict_name = request.request.get('dict_name', USERDICT)
+    oaccount = Account(parent=dict_key(dict_name))
+    oaccount.name         = name
+    oaccount.description  = description
+    oaccount.currencyname = currencyname
+    oaccount.put()
     return oaccount
                 
     
@@ -43,6 +43,8 @@ class ListAccounts(webapp2.RequestHandler):
                 content.append("<hr>")
                 rows = [[account.name,account.description,account.currencyname,buttonformget("/viewaccount/" + account.key.urlsafe(),"View")] for account in getallaccounts(self)]
                 content.append(htmltable(htmlrows(rows)))
+                content.append("<hr>")
+                content.append(htmltable(htmlrow([buttonformget("/addaccount","Add"),buttonformget("/","Home")])))
                 content.append("<hr>")
             else:
                 content = ['Not Authorized']
@@ -63,7 +65,10 @@ class AddAccount(webapp2.RequestHandler):
         content = []
         if user:
             if user.email() in myemails():
-                content.append(html("h1","Add Account"))
+                curnames = [c.name for c in getallcurrencys(self)]
+                curlist  = ["<option value=\""+ c + "\">" + c + "</option>" for c in curnames]
+                curhtml  = "\n".join(curlist)
+                content.append(ADD_ACCOUNT_TEMPLATE.replace("%HTMLCUR%",curhtml))
             else:
                 content = ['Not Authorized']
                 url_linktext = 'Logout'

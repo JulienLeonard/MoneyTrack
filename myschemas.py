@@ -31,6 +31,13 @@ class MoneyMove(ndb.Model):
     value         = ndb.StringProperty(indexed=False)
     date          = ndb.DateTimeProperty(auto_now_add=True)
 
+class MoneyTransfer(ndb.Model):
+    """A main model for representing a transfer money."""
+    accountname1  = ndb.StringProperty(indexed=True)
+    accountname2  = ndb.StringProperty(indexed=True)
+    value         = ndb.StringProperty(indexed=False)
+    date          = ndb.DateTimeProperty(auto_now_add=True)
+    
 class MoneyMoveCategory(ndb.Model):
     """A main model for representing a money move category."""
     name   = ndb.StringProperty(indexed=True)

@@ -1,13 +1,13 @@
 body {
   font-family: Verdana, Helvetica, sans-serif;
   background-color: #DDDDDD;
-  font-size: 16px
+  font-size: 32px
 }
 
 input {
   font-family: Verdana, Helvetica, sans-serif;
   background-color: #FFFFFF;
-  font-size: 16px
+  font-size: 32px
 }
 
 textarea {
@@ -15,9 +15,20 @@ textarea {
   font-size: 32px
 }
 
+option {
+  font-family: Verdana, Helvetica, sans-serif;
+  font-size: 32px
+}
+
+select {
+  font-family: Verdana, Helvetica, sans-serif;
+  font-size: 32px
+}
+
+
 td {
   font-family: Verdana, Helvetica, sans-serif;
-  font-size: 16px
+  font-size: 32px
 }
 
 
