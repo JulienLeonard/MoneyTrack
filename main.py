@@ -22,7 +22,9 @@ from timeutils     import *
 from admin         import *
 from accounts      import *
 from currencies    import *
-from owners        import *
+from owners          import *
+from payees          import *
+from payeecategories import *
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -42,7 +44,7 @@ class MainHandler(webapp2.RequestHandler):
                 content.append("Now is " + date2string(localnow()))
                 content.append(htmltable(htmlrow([buttonformget("/addexpense","New Expense")])))
                 content.append("<hr>")
-                content.append(htmltable(htmlrow([buttonformget("/listowners","Owners"),buttonformget("/listcurrencies","Currencies"),buttonformget("/listaccounts","Accounts"),buttonformget("/logs","Logs"),buttonformget("/export","Exports")])))
+                content.append(htmltable(htmlrow([buttonformget("/listpayeecategorys","Payee Categories"),buttonformget("/listpayees","Payees"),buttonformget("/listowners","Owners"),buttonformget("/listcurrencies","Currencies"),buttonformget("/listaccounts","Accounts"),buttonformget("/logs","Logs"),buttonformget("/export","Exports")])))
                 
             content.append("<hr>")
             url_linktext = 'Logout'
@@ -52,4 +54,4 @@ class MainHandler(webapp2.RequestHandler):
         writehtmlresponse(self,content)
 
         
-app = webapp2.WSGIApplication([('/', MainHandler)] + currencyhandlers() + accounthandlers() + ownerhandlers(), debug=True)
+app = webapp2.WSGIApplication([('/', MainHandler)] + currencyhandlers() + accounthandlers() + ownerhandlers() + payeehandlers() + payeecategoryhandlers(), debug=True)

@@ -14,3 +14,11 @@ def getallcurrencys(request):
 def getallowners(request):
     dict_name = request.request.get('dict_name', USERDICT)
     return Owner.query(ancestor=dict_key(dict_name))
+
+def getallpayees(request):
+    dict_name = request.request.get('dict_name', USERDICT)
+    return Payee.query(ancestor=dict_key(dict_name))
+
+def getallpayeecategorys(request):
+    dict_name = request.request.get('dict_name', USERDICT)
+    return PayeeCategory.query(ancestor=dict_key(dict_name))
