@@ -15,11 +15,40 @@
 # limitations under the License.
 #
 import webapp2
+from utils         import *
+from htmlutils     import *
+from modelutils    import *
+from timeutils     import *
+from admin         import *
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        self.response.write('Hello world!')
 
+        user = users.get_current_user()
+
+        content = []
+        url = users.create_login_url(self.request.uri)
+        if not user:
+            url_linktext = 'Login'
+            content.append(htmllink(url,url_linktext))
+        else:
+            if not user.email() in emails:
+                content.append(html("h1","Not Authorized"))
+            else:
+                content.append(html("h1","Money Track"))
+                content.append("Now is " + date2string(localnow()))
+                content.append(htmltable(htmlrow([buttonformget("/addexpense","Add Expense")])))
+                content.append("<hr>")
+                content.append(htmltable(htmlrow([buttonformget("/listaccounts","Accounts"),buttonformget("/logs","Logs"),buttonformget("/export","Exports")])))
+                
+            content.append("<hr>")
+            url_linktext = 'Logout'
+            content.append(htmllink(url,url_linktext))
+        
+        content = htmlcenter(content)
+        writehtmlresponse(self,content)
+
+        
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
 ], debug=True)
