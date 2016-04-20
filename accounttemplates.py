@@ -19,8 +19,8 @@ ADD_ACCOUNT_TEMPLATE = """\
             <td><div><select name="accountcurrency"     >%HTMLCUR%</select></div></td>
          </tr>
          <tr>
-            <td>Owner</td>
-            <td><div><select name="accountowner"     >%HTMLOWNER%</select></div></td>
+            <td>Liquidity Type</td>
+            <td><div><select name="accountliquiditytype"     >%HTMLLIQUIDITYTYPE%</select></div></td>
          </tr>
       </table>
       <div><input type="submit" value="Add"></div>

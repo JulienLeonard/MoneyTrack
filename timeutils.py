@@ -2,10 +2,10 @@ import datetime
 from utils import *
 
 def utc2local(date):
-    return date + datetime.timedelta(hours=11)
+    return date + datetime.timedelta(hours=8)
 
 def local2utc(date):
-    return date - datetime.timedelta(hours=11)
+    return date - datetime.timedelta(hours=8)
 
 def utcnow():
     return datetime.datetime.utcnow()
@@ -60,6 +60,12 @@ def isdateinrange(daterange,date):
 
 def dateparse(sdate):
     return datetime.datetime.strptime(sdate,'%d/%m/%Y')
+
+def datedump(date):
+    return date.strftime("%d %b %Y %H:%M:%S")
+
+def dateload(sdate):
+    return datetime.datetime.strptime(sdate,'%d %b %Y %H:%M:%S')
 
 def daterangemiddle(daterange):
     return daterange[0] + (daterange[1] - daterange[0])/2 

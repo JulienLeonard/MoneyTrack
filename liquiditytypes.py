@@ -3,7 +3,7 @@ from google.appengine.ext import ndb
 
 import webapp2
 
-from payeetemplates    import *
+from liquiditytypetemplates    import *
 from mydicts           import *
 from myschemas         import *
 from modelutils        import *
@@ -12,38 +12,37 @@ from utils             import *
 from timeutils         import *
 from admin             import *
 
-def payeehandlers():
-    # return [('/listpayees',       ListPayees),
-    #         ('/mylistpayees/(.*)',MyListPayees),
-    #         ('/addpayee',         AddPayee),
-    #         ('/doaddpayee',       DoAddPayee),
-    #         ('/mydoaddpayee/(.*)',MyDoAddPayee)]
-    return [('/listpayees',       ListPayees),
-            ('/addpayee',         AddPayee),
-            ('/doaddpayee',       DoAddPayee)]
+def liquiditytypehandlers():
+    # return [('/listliquiditytypes',       ListLiquiditytypes),
+    #         ('/mylistliquiditytypes/(.*)',MyListLiquiditytypes),
+    #         ('/addliquiditytype',         AddLiquiditytype),
+    #         ('/doaddliquiditytype',       DoAddLiquiditytype),
+    #         ('/mydoaddliquiditytype/(.*)',MyDoAddLiquiditytype)]
+    return [('/listliquiditytypes',       ListLiquidityTypes),
+            ('/addliquiditytype',         AddLiquidityType),
+            ('/doaddliquiditytype',       DoAddLiquidityType)]
 
-def addpayee(request,name,category):
+def addliquiditytype(request,name):
     dict_name = request.request.get('dict_name', USERDICT)
-    opayee = Payee(parent=dict_key(dict_name))
-    opayee.name         = name
-    opayee.category     = category
-    opayee.put()
-    return opayee
+    oliquiditytype = LiquidityType(parent=dict_key(dict_name))
+    oliquiditytype.name         = name
+    oliquiditytype.put()
+    return oliquiditytype
                 
     
-# [START ListPayee]
-class ListPayees(webapp2.RequestHandler):
+# [START ListLiquiditytype]
+class ListLiquidityTypes(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         content = []
         if user:
             if user.email() in myemails():
-                content.append(html("h1","Payees"))
+                content.append(html("h1","Account Liquidity Types"))
                 content.append("<hr>")
-                rows = [[payee.name,payee.category,buttonformget("/viewpayee/" + payee.key.urlsafe(),"View")] for payee in getallpayees(self)]
+                rows = [[liquiditytype.name,buttonformget("/viewliquiditytype/" + liquiditytype.key.urlsafe(),"View")] for liquiditytype in getallliquiditytypes(self)]
                 content.append(htmltable(htmlrows(rows)))
                 content.append("<hr>")
-                content.append(htmltable(htmlrow([buttonformget("/addpayee","Add"),buttonformget("/","Home")])))
+                content.append(htmltable(htmlrow([buttonformget("/addliquiditytype","Add"),buttonformget("/","Home")])))
                 content.append("<hr>")
             else:
                 content = ['Not Authorized']
@@ -57,18 +56,13 @@ class ListPayees(webapp2.RequestHandler):
         writehtmlresponse(self,htmlcenter(content))
 
 # [START AddGeneration]
-class AddPayee(webapp2.RequestHandler):
+class AddLiquidityType(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         content = []
         if user:
             if user.email() in myemails():
-
-                liqs = [c.name for c in getallpayeecategorys(self)]
-                liqs  = ["<option value=\""+ c + "\">" + c + "</option>" for c in liqs]
-                htmlcategories  = "\n".join(liqs)
-
-                content.append(ADD_PAYEE_TEMPLATE.replace("%HTMLCATEGORIES%",htmlcategories))
+                content.append(ADD_LIQUIDITYTYPE_TEMPLATE)
             else:
                 content = ['Not Authorized']
                 url_linktext = 'Logout'
@@ -82,12 +76,11 @@ class AddPayee(webapp2.RequestHandler):
 
 # [END AddGeneration]
 
-# [START DoAddPayee]
-class DoAddPayee(webapp2.RequestHandler):
+# [START DoAddLiquiditytype]
+class DoAddLiquidityType(webapp2.RequestHandler):
     def post(self):
-        payeename         = self.request.get('payeename')
-        payeecategory     = self.request.get('payeecategory')
-        payee = addpayee(self,payeename,payeecategory)
-        self.redirect("/listpayees")
+        liquiditytypename         = self.request.get('liquiditytypename')
+        liquiditytype = addliquiditytype(self,liquiditytypename)
+        self.redirect("/listliquiditytypes")
 # [END DoAddChiChar]
 

@@ -3,7 +3,7 @@ from google.appengine.ext import ndb
 
 import webapp2
 
-from payeetemplates    import *
+from payertemplates    import *
 from mydicts           import *
 from myschemas         import *
 from modelutils        import *
@@ -12,38 +12,38 @@ from utils             import *
 from timeutils         import *
 from admin             import *
 
-def payeehandlers():
-    # return [('/listpayees',       ListPayees),
-    #         ('/mylistpayees/(.*)',MyListPayees),
-    #         ('/addpayee',         AddPayee),
-    #         ('/doaddpayee',       DoAddPayee),
-    #         ('/mydoaddpayee/(.*)',MyDoAddPayee)]
-    return [('/listpayees',       ListPayees),
-            ('/addpayee',         AddPayee),
-            ('/doaddpayee',       DoAddPayee)]
+def payerhandlers():
+    # return [('/listpayers',       ListPayers),
+    #         ('/mylistpayers/(.*)',MyListPayers),
+    #         ('/addpayer',         AddPayer),
+    #         ('/doaddpayer',       DoAddPayer),
+    #         ('/mydoaddpayer/(.*)',MyDoAddPayer)]
+    return [('/listpayers',       ListPayers),
+            ('/addpayer',         AddPayer),
+            ('/doaddpayer',       DoAddPayer)]
 
-def addpayee(request,name,category):
+def addpayer(request,name,category):
     dict_name = request.request.get('dict_name', USERDICT)
-    opayee = Payee(parent=dict_key(dict_name))
-    opayee.name         = name
-    opayee.category     = category
-    opayee.put()
-    return opayee
+    opayer = Payer(parent=dict_key(dict_name))
+    opayer.name         = name
+    opayer.category     = category
+    opayer.put()
+    return opayer
                 
     
-# [START ListPayee]
-class ListPayees(webapp2.RequestHandler):
+# [START ListPayer]
+class ListPayers(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         content = []
         if user:
             if user.email() in myemails():
-                content.append(html("h1","Payees"))
+                content.append(html("h1","Payers"))
                 content.append("<hr>")
-                rows = [[payee.name,payee.category,buttonformget("/viewpayee/" + payee.key.urlsafe(),"View")] for payee in getallpayees(self)]
+                rows = [[payer.name,payer.category,buttonformget("/viewpayer/" + payer.key.urlsafe(),"View")] for payer in getallpayers(self)]
                 content.append(htmltable(htmlrows(rows)))
                 content.append("<hr>")
-                content.append(htmltable(htmlrow([buttonformget("/addpayee","Add"),buttonformget("/","Home")])))
+                content.append(htmltable(htmlrow([buttonformget("/addpayer","Add"),buttonformget("/","Home")])))
                 content.append("<hr>")
             else:
                 content = ['Not Authorized']
@@ -57,18 +57,18 @@ class ListPayees(webapp2.RequestHandler):
         writehtmlresponse(self,htmlcenter(content))
 
 # [START AddGeneration]
-class AddPayee(webapp2.RequestHandler):
+class AddPayer(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         content = []
         if user:
             if user.email() in myemails():
 
-                liqs = [c.name for c in getallpayeecategorys(self)]
+                liqs = [c.name for c in getallpayercategorys(self)]
                 liqs  = ["<option value=\""+ c + "\">" + c + "</option>" for c in liqs]
                 htmlcategories  = "\n".join(liqs)
 
-                content.append(ADD_PAYEE_TEMPLATE.replace("%HTMLCATEGORIES%",htmlcategories))
+                content.append(ADD_PAYER_TEMPLATE.replace("%HTMLCATEGORIES%",htmlcategories))
             else:
                 content = ['Not Authorized']
                 url_linktext = 'Logout'
@@ -82,12 +82,12 @@ class AddPayee(webapp2.RequestHandler):
 
 # [END AddGeneration]
 
-# [START DoAddPayee]
-class DoAddPayee(webapp2.RequestHandler):
+# [START DoAddPayer]
+class DoAddPayer(webapp2.RequestHandler):
     def post(self):
-        payeename         = self.request.get('payeename')
-        payeecategory     = self.request.get('payeecategory')
-        payee = addpayee(self,payeename,payeecategory)
-        self.redirect("/listpayees")
+        payername         = self.request.get('payername')
+        payercategory     = self.request.get('payercategory')
+        payer = addpayer(self,payername,payercategory)
+        self.redirect("/listpayers")
 # [END DoAddChiChar]
 
