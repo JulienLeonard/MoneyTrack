@@ -10,13 +10,15 @@ class Account(ndb.Model):
     description   = ndb.StringProperty(indexed=False)
     currencyname  = ndb.StringProperty(indexed=True)
     liquiditytype = ndb.StringProperty(indexed=True)
+    accounttype   = ndb.StringProperty(indexed=True)
     def string(self):
-        return ",".join([self.name,self.description,self.currencyname,self.liquiditytype])
+        return ",".join([self.name,self.description,self.currencyname,str(self.accounttype),self.liquiditytype])
     def load(self,params):
         self.name          = params[0]
         self.description   = params[1]
         self.currencyname  = params[2]
-        self.liquiditytype = params[3]
+        self.accounttype   = params[3]
+        self.liquiditytype = params[4]
         
 class AccountStatus(ndb.Model):
     """A main model for representing an account status."""
@@ -46,7 +48,15 @@ class LiquidityType(ndb.Model):
         return ",".join([self.name])
     def load(self,params):
         self.name = params[0]
-    
+
+class AccountType(ndb.Model):
+    """A main model for representing an account type (active or closed)."""
+    name   = ndb.StringProperty(indexed=True)
+    def string(self):
+        return ",".join([self.name])
+    def load(self,params):
+        self.name = params[0]
+        
 class CurrencyChange(ndb.Model):
     """A main model for representing a currency change."""
     currencyname1   = ndb.StringProperty(indexed=True)

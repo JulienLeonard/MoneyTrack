@@ -31,7 +31,7 @@ def addaccountstatus(request,account,value,date):
         oaccountstatus.date      = date
     oaccountstatus.put()
     return oaccountstatus
-                
+
     
 # [START ListAccountstatus]
 class ListAccountStatuss(webapp2.RequestHandler):
@@ -42,7 +42,7 @@ class ListAccountStatuss(webapp2.RequestHandler):
             if user.email() in myemails():
                 content.append(html("h1","Account Status"))
                 content.append("<hr>")
-                rows = [[accountstatus.account,accountstatus.value,date2string(utc2local(accountstatus.date))] for accountstatus in getallaccountstatuss(self)]
+                rows = [[accountstatus.account,accountstatus.value,getcurrencyfromaccountname(accountstatus.account),datedumponly(utc2local(accountstatus.date))] for accountstatus in getallaccountstatuss(self)]
                 content.append(htmltable(htmlrows(rows)))
                 content.append("<hr>")
                 content.append(htmltable(htmlrow([buttonformget("/addaccountstatus","Add"),buttonformget("/","Home")])))

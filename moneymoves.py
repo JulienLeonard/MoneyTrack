@@ -67,7 +67,7 @@ class AddMoneyMove(webapp2.RequestHandler):
         if user:
             if user.email() in myemails():
 
-                curnames      = [c.name for c in getallaccounts(self)]
+                curnames      = [c.name for c in getexpenseaccounts(self)]
                 curlist       = ["<option value=\""+ c + "\">" + c + "</option>" for c in curnames]
                 htmlaccounts  = "\n".join(curlist)
 

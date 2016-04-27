@@ -3,9 +3,28 @@ from myschemas import *
 from mydicts   import *
 from timeutils import *
 
+def getcurrencyfromaccountname(account):
+    refcur = {"AUS":"AUD",
+              "FR":"EUR",
+              "SGP":"SGD"}
+    return refcur[account.split(" ")[0].strip()]
+
 def getallaccounts(request):
     dict_name = request.request.get('dict_name', USERDICT)
-    return Account.query(ancestor=dict_key(dict_name))
+    return Account.query(ancestor=dict_key(dict_name)).order(-Account.name)
+
+def getallactiveaccounts(request):
+    dict_name = request.request.get('dict_name', USERDICT)
+    return Account.query(ancestor=dict_key(dict_name)).filter(Account.accounttype == "Active").order(-Account.name)
+
+
+def getexpenseaccounts(request):
+    dict_name = request.request.get('dict_name', USERDICT)
+    return Account.query(ancestor=dict_key(dict_name)).filter(Account.accounttype == "Active").filter(Account.liquiditytype == "Liquid").order(-Account.name)
+
+def getcreditaccounts(request):
+    dict_name = request.request.get('dict_name', USERDICT)
+    return Account.query(ancestor=dict_key(dict_name)).filter(Account.accounttype == "Active").filter(Account.liquiditytype == "Liquid").order(-Account.name)
 
 def getallcurrencys(request):
     dict_name = request.request.get('dict_name', USERDICT)
@@ -14,6 +33,10 @@ def getallcurrencys(request):
 def getallliquiditytypes(request):
     dict_name = request.request.get('dict_name', USERDICT)
     return LiquidityType.query(ancestor=dict_key(dict_name))
+
+def getallaccounttypes(request):
+    dict_name = request.request.get('dict_name', USERDICT)
+    return AccountType.query(ancestor=dict_key(dict_name))
 
 def getallpayees(request):
     dict_name = request.request.get('dict_name', USERDICT)
@@ -37,11 +60,27 @@ def getallmoneymoves(request):
 
 def getallaccountstatuss(request):
     dict_name = request.request.get('dict_name', USERDICT)
-    return AccountStatus.query(ancestor=dict_key(dict_name))
+    return AccountStatus.query(ancestor=dict_key(dict_name)).order(-AccountStatus.date,-AccountStatus.account)
+
+def getaccountstatussforaccount(request,accountname):
+    dict_name = request.request.get('dict_name', USERDICT)
+    return AccountStatus.query(ancestor=dict_key(dict_name)).filter(AccountStatus.account == accountname).order(-AccountStatus.date)
+
+def getallcurrencychanges(request):
+    dict_name = request.request.get('dict_name', USERDICT)
+    return CurrencyChange.query(ancestor=dict_key(dict_name)).order(-CurrencyChange.date)
+
+def getlastcurrencychange(request,currency1,currency2):
+    for cchange in getallcurrencychanges(request):
+        if cchange.currencyname1 == currency1 and cchange.currencyname2 == currency2:
+            return float(cchange.value)
+        else:
+            if cchange.currencyname1 == currency2 and cchange.currencyname2 == currency1:
+                return 1.0/float(cchange.value)
 
 def datastring():
     content = []
-    for klass in [Account,AccountStatus,Currency,LiquidityType,CurrencyChange,MoneyMove,Payee,PayeeCategory,Payer,PayerCategory,MoneyTransfer]:
+    for klass in [Account,Currency,LiquidityType,AccountType,Payee,PayeeCategory,Payer,PayerCategory,MoneyTransfer,AccountStatus,CurrencyChange,MoneyMove]:
         content.append(klass.__name__)
         for instance in klass.query():
             content.append("--- " + instance.string())
@@ -50,6 +89,7 @@ def datastring():
 def parse_string(request,datastring):
     Klass = None
     for line in datastring.split("\n"):
+        logging.info("line to import " + line)
         if len(line.split(" ")) == 1:
             # this is a klass
             Klass = globals()[line.strip()]

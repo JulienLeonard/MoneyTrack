@@ -19,6 +19,10 @@ ADD_ACCOUNT_TEMPLATE = """\
             <td><div><select name="accountcurrency"     >%HTMLCUR%</select></div></td>
          </tr>
          <tr>
+            <td>Account Type</td>
+            <td><div><select name="accounttype"     >%HTMLACCOUNTTYPE%</select></div></td>
+         </tr>
+         <tr>
             <td>Liquidity Type</td>
             <td><div><select name="accountliquiditytype"     >%HTMLLIQUIDITYTYPE%</select></div></td>
          </tr>

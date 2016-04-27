@@ -64,6 +64,9 @@ def dateparse(sdate):
 def datedump(date):
     return date.strftime("%d %b %Y %H:%M:%S")
 
+def datedumponly(date):
+    return date.strftime("%d %b %Y")
+
 def dateload(sdate):
     return datetime.datetime.strptime(sdate,'%d %b %Y %H:%M:%S')
 
