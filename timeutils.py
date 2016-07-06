@@ -70,5 +70,8 @@ def datedumponly(date):
 def dateload(sdate):
     return datetime.datetime.strptime(sdate,'%d %b %Y %H:%M:%S')
 
+def dayload(sdate):
+    return datetime.datetime.strptime(sdate,'%d %b %Y')
+
 def daterangemiddle(daterange):
     return daterange[0] + (daterange[1] - daterange[0])/2 

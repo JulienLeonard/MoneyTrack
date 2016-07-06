@@ -29,7 +29,9 @@ from payeecategories import *
 from liquiditytypes  import *
 from accounttypes    import *
 from accountstatus   import *
+from investsums      import *
 from moneymoves      import *
+from currencychanges import *
 from google.appengine.ext import db
 from maintemplates   import *
 
@@ -54,17 +56,21 @@ class MainHandler(webapp2.RequestHandler):
                 content.append("<hr>")
                 content.append(htmltable(htmlrow([buttonformget("/addaccountstatus","+Account Status")])))
                 content.append("<hr>")
+                content.append(htmltable(htmlrow([buttonformget("/addinvestsum","+InvestSum")])))
+                content.append("<hr>")
                 content.append(htmltable(htmlrow([buttonformget("/addmoneymove/credit","+Income"),])))
                 content.append("<hr>")
                 content.append(htmltable(htmlrow([buttonformget("/capital","Capital"),])))
                 content.append("<hr>")
-                content.append(htmltable(htmlrow([buttonformget("/listaccounts","Accounts"),buttonformget("/listaccountstatuss","AccountStatuses"),buttonformget("/listaccounttypes","AccountTypes")])))
+                content.append(htmltable(htmlrow([buttonformget("/listmoneymoves","MoneyMoves"),])))
+                content.append("<hr>")
+                content.append(htmltable(htmlrow([buttonformget("/listaccounts","Accounts"),buttonformget("/listaccountstatuss","AccountStatuses"),buttonformget("/listinvestsums","InvestSums"),buttonformget("/listaccounttypes","AccountTypes")])))
                 content.append("<hr>")
                 content.append(htmltable(htmlrow([buttonformget("/listpayees","Payees"),buttonformget("/listpayeecategorys","Payee Categories")])))
                 content.append("<hr>")
                 content.append(htmltable(htmlrow([buttonformget("/listpayers","Payers"),buttonformget("/listpayercategorys","Payer Categories")])))
                 content.append("<hr>")
-                content.append(htmltable(htmlrow([buttonformget("/listcurrencies","Currencies"),buttonformget("/listliquiditytypes","Liquidity Types")])))
+                content.append(htmltable(htmlrow([buttonformget("/listcurrencychanges","Currency Changes"),buttonformget("/listcurrencies","Currencies"),buttonformget("/listliquiditytypes","Liquidity Types")])))
                 content.append("<hr>")
                 content.append(htmltable(htmlrow([buttonformget("/clear","Clear"),buttonformget("/logs","Logs"),buttonformget("/import","Import"),buttonformget("/export","Export")])))
                 
@@ -107,6 +113,14 @@ class ExportHandler(webapp2.RequestHandler):
             else:
                 self.response.write(datastring())
 
+class MyExportHandler(webapp2.RequestHandler):
+    def get(self,email):
+        if not email in myemails():
+            content.append(html("h1","Not Authorized"))
+        else:
+            self.response.write(datastring())
+
+                
 class ImportHandler(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
@@ -121,7 +135,6 @@ class ImportHandler(webapp2.RequestHandler):
             else:
                 self.response.write(IMPORT_TEMPLATE)
         
-
 # [START DoImport]
 class DoImport(webapp2.RequestHandler):
     def post(self):
@@ -191,8 +204,60 @@ class CapitalHandler(webapp2.RequestHandler):
         content = htmlcenter(content)
         writehtmlresponse(self,content)
 
+class MyCapitalHandler(webapp2.RequestHandler):
+    def get(self,email):
+        content = []
+        if not email in myemails():
+            content.append(html("h1","Not Authorized"))
+        else:
+            totalcurrencies = {}
+            aaccounts = []
+            changes = {}
+                
+            for currency in getallcurrencys(self):
+                totalcurrencies[currency.name] = 0.0
 
+                for currency1 in totalcurrencies:
+                    for currency2 in totalcurrencies:
+                        if currency1 == currency2:
+                            changes[(currency1,currency2)] = 1.0
+                        else:
+                            if (currency2,currency1) in changes:
+                                changes[(currency1,currency2)] = 1/changes[(currency2,currency1)]
+                            else:
+                                # get last corresponding currencychange available
+                                changes[(currency1,currency2)] = getlastcurrencychange(self,currency1,currency2)
+                    
+                                
+            for account in getallactiveaccounts(self):
+                currency = getcurrencyfromaccountname(account.name)
+                lastaccountstatus = getaccountstatussforaccount(self,account.name).fetch(1)[0]
+                aaccounts.append([account.name,lastaccountstatus.value,currency,datedumponly(lastaccountstatus.date)])
+                totalcurrencies[currency] += float(lastaccountstatus.value)
 
+            totals = {}
+            for currency1 in totalcurrencies:
+                ctotal = 0.0
+                for currency2 in totalcurrencies:
+                    ctotal +=  totalcurrencies[currency2] /changes[(currency1,currency2)]
+                totals[currency1] = ctotal
+                    
+                    
+            content.append(html("h1","Current Capital"))
+            content.append("<hr>")
+            content.append(html("h2","Currency Capitals"))
+            content.append(htmltable(htmlrows([[totalcurrencies[currency],currency] for currency in totalcurrencies])))
+            content.append("<hr>")
+            content.append(html("h2","Total per currency"))
+            content.append(htmltable(htmlrows([[totals[currency],currency] for currency in totalcurrencies])))
+            content.append("<hr>")
+            content.append(html("h2","Active account status"))
+            content.append(htmltable(htmlrows(aaccounts)))
+            content.append("<hr>")
+
+                
+        content = htmlcenter(content)
+        writehtmlresponse(self,content)
         
         
-app = webapp2.WSGIApplication([('/', MainHandler),('/clear', ClearHandler),('/export', ExportHandler),('/capital', CapitalHandler),('/import', ImportHandler),('/doimport', DoImport)] + currencyhandlers() + accounthandlers() + liquiditytypehandlers() + accounttypehandlers() + payeehandlers() + payeecategoryhandlers() + payerhandlers() + payercategoryhandlers() + accountstatushandlers() + moneymovehandlers(), debug=True)
+app = webapp2.WSGIApplication([('/', MainHandler),('/clear', ClearHandler),('/export', ExportHandler),('/myexport/(.*)', MyExportHandler),('/capital', CapitalHandler),('/mycapital/(.*)', MyCapitalHandler),('/import', ImportHandler),('/doimport', DoImport)] + currencyhandlers() + accounthandlers() + liquiditytypehandlers() + accounttypehandlers() + payeehandlers() + payeecategoryhandlers() + payerhandlers() + payercategoryhandlers() + accountstatushandlers() + moneymovehandlers() + investsumhandlers() + currencychangehandlers(),  debug=True)

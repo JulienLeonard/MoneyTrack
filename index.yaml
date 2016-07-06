@@ -64,3 +64,24 @@ indexes:
   properties:
   - name: date
     direction: desc
+
+- kind: InvestSum
+  ancestor: yes
+  properties:
+  - name: account
+  - name: date
+    direction: desc
+
+- kind: InvestSum
+  ancestor: yes
+  properties:
+  - name: date
+    direction: desc
+  - name: account
+    direction: desc
+
+- kind: MoneyMove
+  ancestor: yes
+  properties:
+  - name: date
+    direction: desc

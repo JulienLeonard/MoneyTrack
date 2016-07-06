@@ -56,7 +56,7 @@ def getallpayercategorys(request):
 
 def getallmoneymoves(request):
     dict_name = request.request.get('dict_name', USERDICT)
-    return MoneyMove.query(ancestor=dict_key(dict_name))
+    return MoneyMove.query(ancestor=dict_key(dict_name)).order(-MoneyMove.date)
 
 def getallaccountstatuss(request):
     dict_name = request.request.get('dict_name', USERDICT)
@@ -65,6 +65,14 @@ def getallaccountstatuss(request):
 def getaccountstatussforaccount(request,accountname):
     dict_name = request.request.get('dict_name', USERDICT)
     return AccountStatus.query(ancestor=dict_key(dict_name)).filter(AccountStatus.account == accountname).order(-AccountStatus.date)
+
+def getallinvestsums(request):
+    dict_name = request.request.get('dict_name', USERDICT)
+    return InvestSum.query(ancestor=dict_key(dict_name)).order(-InvestSum.date,-InvestSum.account)
+
+def getinvestsumsforaccount(request,accountname):
+    dict_name = request.request.get('dict_name', USERDICT)
+    return InvestSum.query(ancestor=dict_key(dict_name)).filter(InvestSum.account == accountname).order(-InvestSum.date)
 
 def getallcurrencychanges(request):
     dict_name = request.request.get('dict_name', USERDICT)
@@ -100,13 +108,15 @@ def parse_string(request,datastring):
             instance.load(instancedata)
             instance.put()
 
-            
-
-            
-
-
-
-
-            
-
+def getaccountROI(request,account):
+    qresult = getaccountstatussforaccount(request,account.name).fetch(1)
+    if not len(qresult) > 0:
+        return "NA"
+    lastaccountstatus = float(qresult[0].value)
+    sum = 0.0
+    for isum in getinvestsumsforaccount(request,account.name):
+        sum += float(isum.value)
+    if sum == 0.0:
+        return "NA"
+    return float(int(((lastaccountstatus - sum)/sum * 10000.0)))/100.0
 

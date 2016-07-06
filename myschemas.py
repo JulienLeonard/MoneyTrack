@@ -133,7 +133,20 @@ class MoneyTransfer(ndb.Model):
         return ",".join([self.accountname1,self.accountname2,self.value,datedump(self.date)])
     def load(self,params):
         self.accountname1 = params[0]
-        self.accountname2 = params[0]
+        self.accountname2 = params[1]
         self.value    = params[2]
         self.date     = dateload(params[3])
+
+class InvestSum(ndb.Model):
+    """A main model for representing an invest sum"""
+    account   = ndb.StringProperty(indexed=True)
+    value         = ndb.StringProperty(indexed=False)
+    date          = ndb.DateTimeProperty(auto_now_add=True)
+    def string(self):
+        return ",".join([self.account,self.value,datedump(self.date)])
+    def load(self,params):
+        logging.info("InvestSum params" + str(params))
+        self.account = params[0]
+        self.value   = params[1]
+        self.date    = dateload(params[2])
     

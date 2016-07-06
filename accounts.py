@@ -20,6 +20,7 @@ def accounthandlers():
     #         ('/mydoaddaccount/(.*)',MyDoAddAccount)]
     return [('/listaccounts',       ListAccounts),
             ('/listaccountaccountstatus/(.*)',   ListAccountAccountStatus),
+            ('/listaccountinvestsum/(.*)',       ListAccountInvestSum),
             ('/addaccount',         AddAccount),
             ('/doaddaccount',       DoAddAccount)]
 
@@ -44,7 +45,7 @@ class ListAccounts(webapp2.RequestHandler):
             if user.email() in myemails():
                 content.append(html("h1","Accounts"))
                 content.append("<hr>")
-                rows = [[account.name,account.currencyname,account.accounttype,account.liquiditytype,buttonformget("/viewaccount/" + account.key.urlsafe(),"View"),buttonformget("/listaccountaccountstatus/" + account.key.urlsafe(),"List Status"),buttonformget("/addaccountstatus/" + account.key.urlsafe(),"Add Status")] for account in getallaccounts(self)]
+                rows = [[account.name,account.currencyname,account.accounttype,account.liquiditytype,getaccountROI(self,account),buttonformget("/viewaccount/" + account.key.urlsafe(),"View"),buttonformget("/listaccountaccountstatus/" + account.key.urlsafe(),"List Status"),buttonformget("/addaccountstatus/" + account.key.urlsafe(),"Add Status"),buttonformget("/listaccountinvestsum/" + account.key.urlsafe(),"List Invest Sum"),buttonformget("/addinvestsum/" + account.key.urlsafe(),"Add Invest Sum")] for account in getallaccounts(self)]
                 content.append(htmltable(htmlrows(rows)))
                 content.append("<hr>")
                 content.append(htmltable(htmlrow([buttonformget("/addaccount","Add"),buttonformget("/","Home")])))
@@ -127,6 +128,36 @@ class ListAccountAccountStatus(webapp2.RequestHandler):
                 content.append(htmltable(htmlrows(rows)))
                 content.append("<hr>")
                 content.append(htmltable(htmlrow([buttonformget("/addaccountstatus","Add"),buttonformget("/","Home")])))
+                content.append("<hr>")
+            else:
+                content = ['Not Authorized']
+                url_linktext = 'Logout'
+                content.append(htmllink(url,url_linktext))
+        else:
+            content = ['You must login']
+            url_linktext = 'Login'
+            content.append(htmllink(url,url_linktext))
+        
+        writehtmlresponse(self,htmlcenter(content))
+
+# [START ListAccountInvestSum]
+class ListAccountInvestSum(webapp2.RequestHandler):
+    def get(self,accountid):
+        user = users.get_current_user()
+        content = []
+        if user:
+            if user.email() in myemails():
+
+                dict_name      = self.request.get('dict_name',USERDICT)
+                account_key = ndb.Key(urlsafe=accountid)
+                account = account_key.get()
+                
+                content.append(html("h1","Account Status for account " + account.name))
+                content.append("<hr>")
+                rows = [[datedumponly(utc2local(investsum.date)),investsum.value,getcurrencyfromaccountname(investsum.account)] for investsum in getinvestsumsforaccount(self,account.name)]
+                content.append(htmltable(htmlrows(rows)))
+                content.append("<hr>")
+                content.append(htmltable(htmlrow([buttonformget("/addinvestsum","Add"),buttonformget("/","Home")])))
                 content.append("<hr>")
             else:
                 content = ['Not Authorized']
