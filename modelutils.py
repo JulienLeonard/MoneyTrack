@@ -24,6 +24,16 @@ def addaccount(request,name,description,currencyname,accounttype,liquiditytype):
     oaccount.put()
     return oaccount
 
+def addinvestsum(request,account,value,date):
+    dict_name = request.request.get('dict_name', USERDICT)
+    oinvestsum = InvestSum(parent=dict_key(dict_name))
+    oinvestsum.account   = account
+    oinvestsum.value     = value
+    if not date == None:
+        oinvestsum.date      = dayload(date)
+    oinvestsum.put()
+    return oinvestsum
+
 def getallactiveaccounts(request):
     dict_name = request.request.get('dict_name', USERDICT)
     return Account.query(ancestor=dict_key(dict_name)).filter(Account.accounttype == "Active").order(-Account.name)
@@ -111,7 +121,7 @@ def getaccountstatussforaccount(request,accountname):
 
 def getallinvestsums(request):
     dict_name = request.request.get('dict_name', USERDICT)
-    return InvestSum.query(ancestor=dict_key(dict_name)).order(-InvestSum.date,-InvestSum.account)
+    return InvestSum.query(ancestor=dict_key(dict_name)).order(-InvestSum.date)
 
 def getinvestsumsforaccount(request,accountname):
     dict_name = request.request.get('dict_name', USERDICT)
@@ -180,7 +190,12 @@ def myaccounts(dbaccounts):
         result[myaccount.ID()] = myaccount
     return result
 
-
+def myaccountstatuss(dbaccountstatuss):
+    result = {}
+    for dbaccountstatus in dbaccountsstatuss:
+        myaccountstatus = MyAccountStatus(dbaccountstatus)
+        result[myaccountstatus.ID()] = myaccountstatus
+    return result
 
 def parse_expense_string(request,name,datastring):
     
@@ -273,5 +288,5 @@ def getaccountROIdays(request,account):
     for (deltadays,isum) in sortlist:
         ssum += (deltadays/longestdays) * isum
 
-    return (365.0/longestdays) * (incall / ssum)
+    return float(int((365.0/longestdays) * (incall / ssum) * 10000.0))/100.0
 

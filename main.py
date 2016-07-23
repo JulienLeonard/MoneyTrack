@@ -34,6 +34,7 @@ from moneymoves      import *
 from currencychanges import *
 from google.appengine.ext import db
 from maintemplates   import *
+from chartemplate   import *
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -77,6 +78,8 @@ class MainHandler(webapp2.RequestHandler):
                 content.append(htmltable(htmlrow([buttonformget("/importexpense","Import Expenses")])))
                 content.append("<hr>")
                 content.append(htmltable(htmlrow([buttonformget("/reportexpensemonth","Monthly Expenses"),buttonformget("/reportexpensecategorymonth","Monthly Expenses per Category")])))
+                content.append("<hr>")
+                content.append(htmltable(htmlrow([buttonformget("/reportincomemonth","Monthly Income")])))
                 
                 
             content.append("<hr>")
@@ -193,18 +196,78 @@ class ReportExpenseMonthHandler(webapp2.RequestHandler):
                 for mm in moneymoves.values():
                     puts("mm",mm.maccount)
                     if float(mm.mvalue) < 0.0:
-                        smonth = dateloadandroid(mm.mdate).strftime("%m %Y")
+                        smonth = dateloadandroid(mm.mdate).strftime("%Y %m")
                         if not smonth in  months:
                             months[smonth] = 0.0
                         months[smonth] += float(mm.mvalue)
 
                 content.append(htmltable(htmlrows([["Month","Expenses"]] + [[smonth, months[smonth]] for smonth in sorted(months.keys())])))
                 content.append("<hr>")
+
+                smonths = ["\"" + smonth + "\"" for smonth in sorted(months.keys())]
+                values = [str(-months[smonth]) for smonth in sorted(months.keys())]
+
+                CONTAINER = "expenses"
+                TITLE = "Expenses"
+                CATEGORIES = ",".join(smonths)
+                YAXIS = "SGD"
+                NAME = "Expenses"
+                DATA = ",".join(values)
+                content.append(charttemplate.replace('%CONTAINER%',CONTAINER).replace('%TITLE%',TITLE).replace('%CATEGORIES%',CATEGORIES).replace('%YAXIS%',YAXIS).replace('%NAME%',NAME).replace('%DATA%',DATA))
+
+                content.append("<hr>")
+
                 
                 
         content = htmlcenter(content)
         writehtmlresponse(self,content)
 
+
+class ReportIncomeMonthHandler(webapp2.RequestHandler):
+    def get(self):
+        user = users.get_current_user()
+        content = []
+        url = users.create_login_url(self.request.uri)
+        if not user:
+            url_linktext = 'Login'
+            content.append(htmllink(url,url_linktext))
+        else:
+            if not user.email() in myemails():
+                content.append(html("h1","Not Authorized"))
+            else:
+                content.append(html("h1","Income Month Report"))
+
+                moneymoves     = mymoneymoves(getallmoneymoves(self))
+
+                months = {}
+                for mm in moneymoves.values():
+                    puts("mm",mm.maccount)
+                    if float(mm.mvalue) > 0.0:
+                        smonth = dateloadandroid(mm.mdate).strftime("%Y %m")
+                        if not smonth in  months:
+                            months[smonth] = 0.0
+                        months[smonth] += float(mm.mvalue)
+
+                content.append(htmltable(htmlrows([["Month","Expenses"]] + [[smonth, months[smonth]] for smonth in sorted(months.keys())])))
+                content.append("<hr>")
+
+                smonths = ["\"" + smonth + "\"" for smonth in sorted(months.keys())]
+                values = [str(months[smonth]) for smonth in sorted(months.keys())]
+
+                CONTAINER = "income"
+                TITLE = "Income"
+                CATEGORIES = ",".join(smonths)
+                YAXIS = "SGD"
+                NAME = "Income"
+                DATA = ",".join(values)
+                content.append(charttemplate.replace('%CONTAINER%',CONTAINER).replace('%TITLE%',TITLE).replace('%CATEGORIES%',CATEGORIES).replace('%YAXIS%',YAXIS).replace('%NAME%',NAME).replace('%DATA%',DATA))
+
+                content.append("<hr>")
+                
+        content = htmlcenter(content)
+        writehtmlresponse(self,content)
+
+        
 class ReportExpenseCategoryMonthHandler(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
@@ -389,5 +452,79 @@ class MyCapitalHandler(webapp2.RequestHandler):
         content = htmlcenter(content)
         writehtmlresponse(self,content)
         
+class ChartHandler(webapp2.RequestHandler):
+    def get(self):
+
+        user = users.get_current_user()
+
+        content = []
+        url = users.create_login_url(self.request.uri)
+        if not user:
+            url_linktext = 'Login'
+            content.append(htmllink(url,url_linktext))
+        else:
+            if not user.email() in myemails():
+                content.append(html("h1","Not Authorized"))
+            else:
+                content.append(html("h1","Money Track"))
+                content.append("Now is " + date2string(localnow()))
+                content.append("<hr>")
+
+                
+                moneymoves     = mymoneymoves(getallmoneymoves(self))
+
+                months = {}
+                for mm in moneymoves.values():
+                    puts("mm",mm.maccount)
+                    if float(mm.mvalue) < 0.0:
+                        smonth = dateloadandroid(mm.mdate).strftime("%Y%m")
+                        if not smonth in  months:
+                            months[smonth] = 0.0
+                        months[smonth] += float(mm.mvalue)
+
+                                
+                smonths = ["\"" + smonth + "\"" for smonth in sorted(months.keys())]
+                values = [str(-months[smonth]) for smonth in sorted(months.keys())]
+
+                CONTAINER = "expenses"
+                TITLE = "Expenses"
+                CATEGORIES = ",".join(smonths)
+                YAXIS = "SGD"
+                NAME = "Expenses"
+                DATA = ",".join(values)
+                content.append(charttemplate.replace('%CONTAINER%',CONTAINER).replace('%TITLE%',TITLE).replace('%CATEGORIES%',CATEGORIES).replace('%YAXIS%',YAXIS).replace('%NAME%',NAME).replace('%DATA%',DATA))
+
+                content.append("<hr>")
+
+                months = {}
+                for mm in moneymoves.values():
+                    puts("mm",mm.maccount)
+                    if float(mm.mvalue) > 0.0:
+                        smonth = dateloadandroid(mm.mdate).strftime("%Y%m")
+                        if not smonth in  months:
+                            months[smonth] = 0.0
+                        months[smonth] += float(mm.mvalue)
+
+                                
+                smonths = ["\"" + smonth + "\"" for smonth in sorted(months.keys())]
+                values = [str(months[smonth]) for smonth in sorted(months.keys())]
+
+                CONTAINER = "income"
+                TITLE = "Income"
+                CATEGORIES = ",".join(smonths)
+                YAXIS = "SGD"
+                NAME = "Incomes"
+                DATA = ",".join(values)
+                content.append(charttemplate.replace('%CONTAINER%',CONTAINER).replace('%TITLE%',TITLE).replace('%CATEGORIES%',CATEGORIES).replace('%YAXIS%',YAXIS).replace('%NAME%',NAME).replace('%DATA%',DATA))
+
+
+                
+            content.append("<hr>")
+            url_linktext = 'Logout'
+            content.append(htmllink(url,url_linktext))
         
-app = webapp2.WSGIApplication([('/', MainHandler),('/clear', ClearHandler),('/export', ExportHandler),('/myexport/(.*)', MyExportHandler),('/capital', CapitalHandler),('/mycapital/(.*)', MyCapitalHandler),('/reportexpensemonth', ReportExpenseMonthHandler),('/reportexpensecategorymonth', ReportExpenseCategoryMonthHandler),('/import', ImportHandler),('/doimport', DoImport),('/importexpense', ImportExpenseHandler),('/doimportexpense', DoImportExpense)] + currencyhandlers() + accounthandlers() + liquiditytypehandlers() + accounttypehandlers() + payeehandlers() + payeecategoryhandlers() + payerhandlers() + payercategoryhandlers() + accountstatushandlers() + moneymovehandlers() + investsumhandlers() + currencychangehandlers(),  debug=True)
+        content = htmlcenter(content)
+        writehtmlresponse(self,content)
+
+        
+app = webapp2.WSGIApplication([('/', MainHandler),('/chart', ChartHandler),('/clear', ClearHandler),('/export', ExportHandler),('/myexport/(.*)', MyExportHandler),('/capital', CapitalHandler),('/mycapital/(.*)', MyCapitalHandler),('/reportexpensemonth', ReportExpenseMonthHandler),('/reportincomemonth', ReportIncomeMonthHandler),('/reportexpensecategorymonth', ReportExpenseCategoryMonthHandler),('/import', ImportHandler),('/doimport', DoImport),('/importexpense', ImportExpenseHandler),('/doimportexpense', DoImportExpense)] + currencyhandlers() + accounthandlers() + liquiditytypehandlers() + accounttypehandlers() + payeehandlers() + payeecategoryhandlers() + payerhandlers() + payercategoryhandlers() + accountstatushandlers() + moneymovehandlers() + investsumhandlers() + currencychangehandlers(),  debug=True)

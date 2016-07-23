@@ -31,6 +31,15 @@ class Account(ndb.Model):
         self.currencyname  = params[2]
         self.accounttype   = params[3]
         self.liquiditytype = params[4]
+
+class MyAccountStatus:
+    def __init__(self,dbaccountstatus):
+        self.maccount     = dbaccountstatus.account
+        self.mvalue       = dbaccountstatus.value
+        self.mdate        = datedumponlyandroid(dbaccountstatus.date)
+
+    def ID(self):
+        return self.maccount + self.mvalue + self.mdate
         
 class AccountStatus(ndb.Model):
     """A main model for representing an account status."""
