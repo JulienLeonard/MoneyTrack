@@ -73,6 +73,11 @@ class MainHandler(webapp2.RequestHandler):
                 content.append(htmltable(htmlrow([buttonformget("/listcurrencychanges","Currency Changes"),buttonformget("/listcurrencies","Currencies"),buttonformget("/listliquiditytypes","Liquidity Types")])))
                 content.append("<hr>")
                 content.append(htmltable(htmlrow([buttonformget("/clear","Clear"),buttonformget("/logs","Logs"),buttonformget("/import","Import"),buttonformget("/export","Export")])))
+                content.append("<hr>")
+                content.append(htmltable(htmlrow([buttonformget("/importexpense","Import Expenses")])))
+                content.append("<hr>")
+                content.append(htmltable(htmlrow([buttonformget("/reportexpensemonth","Monthly Expenses"),buttonformget("/reportexpensecategorymonth","Monthly Expenses per Category")])))
+                
                 
             content.append("<hr>")
             url_linktext = 'Logout'
@@ -142,6 +147,131 @@ class DoImport(webapp2.RequestHandler):
         parse_string(self,datastring)
         self.redirect("/")
 # [END DoImport]
+
+
+class ImportExpenseHandler(webapp2.RequestHandler):
+    def get(self):
+        user = users.get_current_user()
+        content = []
+        url = users.create_login_url(self.request.uri)
+        if not user:
+            url_linktext = 'Login'
+            content.append(htmllink(url,url_linktext))
+        else:
+            if not user.email() in myemails():
+                content.append(html("h1","Not Authorized"))
+            else:
+                self.response.write(IMPORT_EXPENSE_TEMPLATE)
+        
+# [START DoImport]
+class DoImportExpense(webapp2.RequestHandler):
+    def post(self):
+        datastring         = self.request.get('importexpensecontent')
+        name               = self.request.get('importexpensename')
+        parse_expense_string(self,name,datastring)
+        self.redirect("/")
+# [END DoImport]
+
+
+class ReportExpenseMonthHandler(webapp2.RequestHandler):
+    def get(self):
+        user = users.get_current_user()
+        content = []
+        url = users.create_login_url(self.request.uri)
+        if not user:
+            url_linktext = 'Login'
+            content.append(htmllink(url,url_linktext))
+        else:
+            if not user.email() in myemails():
+                content.append(html("h1","Not Authorized"))
+            else:
+                content.append(html("h1","Expense Month Report"))
+
+                moneymoves     = mymoneymoves(getallmoneymoves(self))
+
+                months = {}
+                for mm in moneymoves.values():
+                    puts("mm",mm.maccount)
+                    if float(mm.mvalue) < 0.0:
+                        smonth = dateloadandroid(mm.mdate).strftime("%m %Y")
+                        if not smonth in  months:
+                            months[smonth] = 0.0
+                        months[smonth] += float(mm.mvalue)
+
+                content.append(htmltable(htmlrows([["Month","Expenses"]] + [[smonth, months[smonth]] for smonth in sorted(months.keys())])))
+                content.append("<hr>")
+                
+                
+        content = htmlcenter(content)
+        writehtmlresponse(self,content)
+
+class ReportExpenseCategoryMonthHandler(webapp2.RequestHandler):
+    def get(self):
+        user = users.get_current_user()
+        content = []
+        url = users.create_login_url(self.request.uri)
+        if not user:
+            url_linktext = 'Login'
+            content.append(htmllink(url,url_linktext))
+        else:
+            if not user.email() in myemails():
+                content.append(html("h1","Not Authorized"))
+            else:
+                content.append(html("h1","Expense Month Report"))
+
+                moneymoves     = mymoneymoves(getallmoneymoves(self))
+                payees         = mypayees(getallpayees(self))
+                
+                categorymonths = {}
+                categorys = []
+                months = []
+                for mm in moneymoves.values():
+                    puts("mm",mm.maccount)
+                    if float(mm.mvalue) < 0.0:
+                        smonth   = dateloadandroid(mm.mdate).strftime("%m %Y")
+                        category = payees[mm.mpayee].mcategory
+
+                        key = category + "." + smonth
+                        if not category in categorys:
+                            categorys.append(category)
+                        if not smonth in months:
+                            months.append(smonth)
+                        if not key in  categorymonths:
+                            categorymonths[key] = 0.0
+                        categorymonths[key] += float(mm.mvalue)
+
+
+                months = sorted(months)
+                firstrow = [""] + months
+                rows = [firstrow]
+                for category in categorys:
+                    data = []
+                    for smonth in months:
+                        key = category + "." + smonth
+                        if not key in categorymonths:
+                            value = "0.0"
+                        else:
+                            value = str(categorymonths[key])
+                        data.append(value)
+                    rows.append([category] + data)
+
+                # total
+                tmonths = {}
+                for tmonth in months:
+                    tmonths[tmonth] = 0.0
+                    for category in categorys:
+                        key = category + "." + tmonth
+                        if key in categorymonths:
+                            tmonths[tmonth] += float(categorymonths[key])
+                rows.append(["Total"] + [str(tmonths[tmonth]) for tmonth in months])
+                content.append(htmltable(htmlrows(rows)))
+                content.append("<hr>")
+                
+                
+        content = htmlcenter(content)
+        writehtmlresponse(self,content)
+
+        
 
 class CapitalHandler(webapp2.RequestHandler):
     def get(self):
@@ -260,4 +390,4 @@ class MyCapitalHandler(webapp2.RequestHandler):
         writehtmlresponse(self,content)
         
         
-app = webapp2.WSGIApplication([('/', MainHandler),('/clear', ClearHandler),('/export', ExportHandler),('/myexport/(.*)', MyExportHandler),('/capital', CapitalHandler),('/mycapital/(.*)', MyCapitalHandler),('/import', ImportHandler),('/doimport', DoImport)] + currencyhandlers() + accounthandlers() + liquiditytypehandlers() + accounttypehandlers() + payeehandlers() + payeecategoryhandlers() + payerhandlers() + payercategoryhandlers() + accountstatushandlers() + moneymovehandlers() + investsumhandlers() + currencychangehandlers(),  debug=True)
+app = webapp2.WSGIApplication([('/', MainHandler),('/clear', ClearHandler),('/export', ExportHandler),('/myexport/(.*)', MyExportHandler),('/capital', CapitalHandler),('/mycapital/(.*)', MyCapitalHandler),('/reportexpensemonth', ReportExpenseMonthHandler),('/reportexpensecategorymonth', ReportExpenseCategoryMonthHandler),('/import', ImportHandler),('/doimport', DoImport),('/importexpense', ImportExpenseHandler),('/doimportexpense', DoImportExpense)] + currencyhandlers() + accounthandlers() + liquiditytypehandlers() + accounttypehandlers() + payeehandlers() + payeecategoryhandlers() + payerhandlers() + payercategoryhandlers() + accountstatushandlers() + moneymovehandlers() + investsumhandlers() + currencychangehandlers(),  debug=True)

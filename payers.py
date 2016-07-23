@@ -20,7 +20,8 @@ def payerhandlers():
     #         ('/mydoaddpayer/(.*)',MyDoAddPayer)]
     return [('/listpayers',       ListPayers),
             ('/addpayer',         AddPayer),
-            ('/doaddpayer',       DoAddPayer)]
+            ('/doaddpayer',       DoAddPayer),
+            ('/viewpayer/(.*)',   ViewPayer)]
 
 def addpayer(request,name,category):
     dict_name = request.request.get('dict_name', USERDICT)
@@ -89,5 +90,33 @@ class DoAddPayer(webapp2.RequestHandler):
         payercategory     = self.request.get('payercategory')
         payer = addpayer(self,payername,payercategory)
         self.redirect("/listpayers")
-# [END DoAddChiChar]
+# [END DoAddPayer]
+
+class ViewPayer(webapp2.RequestHandler):
+    def get(self,payerid):
+        user = users.get_current_user()
+        content = []
+        if user:
+            if user.email() in myemails():
+                dict_name      = self.request.get('dict_name',USERDICT)
+                payer_key = ndb.Key(urlsafe=payerid)
+                payer = payer_key.get()
+                
+                content.append(html("h1","Payer Money Move " + payer.name))
+                content.append("<hr>")
+                rows = [[datedumponly(utc2local(moneymove.date)),moneymove.value] for moneymove in getmoneymovesforpayer(self,payer.name)]
+                content.append(htmltable(htmlrows(rows)))
+                content.append("<hr>")
+                content.append(htmltable(htmlrow([buttonformget("/","Home")])))
+                content.append("<hr>")
+            else:
+                content = ['Not Authorized']
+                url_linktext = 'Logout'
+                content.append(htmllink(url,url_linktext))
+        else:
+            content = ['You must login']
+            url_linktext = 'Login'
+            content.append(htmllink(url,url_linktext))
+        
+        writehtmlresponse(self,htmlcenter(content))
 

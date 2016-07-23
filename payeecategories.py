@@ -21,13 +21,6 @@ def payeecategoryhandlers():
     return [('/listpayeecategorys',       ListPayeeCategorys),
             ('/addpayeecategory',         AddPayeeCategory),
             ('/doaddpayeecategory',       DoAddPayeeCategory)]
-
-def addpayeecategory(request,name):
-    dict_name = request.request.get('dict_name', USERDICT)
-    opayeecategory = PayeeCategory(parent=dict_key(dict_name))
-    opayeecategory.name         = name
-    opayeecategory.put()
-    return opayeecategory
                 
     
 # [START ListPayeecategory]

@@ -23,17 +23,6 @@ def accounthandlers():
             ('/listaccountinvestsum/(.*)',       ListAccountInvestSum),
             ('/addaccount',         AddAccount),
             ('/doaddaccount',       DoAddAccount)]
-
-def addaccount(request,name,description,currencyname,accounttype,liquiditytype):
-    dict_name = request.request.get('dict_name', USERDICT)
-    oaccount = Account(parent=dict_key(dict_name))
-    oaccount.name         = name
-    oaccount.description  = description
-    oaccount.currencyname = currencyname
-    oaccount.accounttype  = accounttype
-    oaccount.liquiditytype = liquiditytype
-    oaccount.put()
-    return oaccount
                 
     
 # [START ListAccount]
@@ -45,7 +34,7 @@ class ListAccounts(webapp2.RequestHandler):
             if user.email() in myemails():
                 content.append(html("h1","Accounts"))
                 content.append("<hr>")
-                rows = [[account.name,account.currencyname,account.accounttype,account.liquiditytype,getaccountROI(self,account),buttonformget("/viewaccount/" + account.key.urlsafe(),"View"),buttonformget("/listaccountaccountstatus/" + account.key.urlsafe(),"List Status"),buttonformget("/addaccountstatus/" + account.key.urlsafe(),"Add Status"),buttonformget("/listaccountinvestsum/" + account.key.urlsafe(),"List Invest Sum"),buttonformget("/addinvestsum/" + account.key.urlsafe(),"Add Invest Sum")] for account in getallaccounts(self)]
+                rows = [[account.name,account.currencyname,account.accounttype,account.liquiditytype,getaccountROI(self,account),getaccountROIdays(self,account),buttonformget("/viewaccount/" + account.key.urlsafe(),"View"),buttonformget("/listaccountaccountstatus/" + account.key.urlsafe(),"List Status"),buttonformget("/addaccountstatus/" + account.key.urlsafe(),"Add Status"),buttonformget("/listaccountinvestsum/" + account.key.urlsafe(),"List Invest Sum"),buttonformget("/addinvestsum/" + account.key.urlsafe(),"Add Invest Sum")] for account in getallaccounts(self)]
                 content.append(htmltable(htmlrows(rows)))
                 content.append("<hr>")
                 content.append(htmltable(htmlrow([buttonformget("/addaccount","Add"),buttonformget("/","Home")])))

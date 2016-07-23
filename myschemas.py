@@ -4,6 +4,18 @@ from timeutils import *
 import datetime, time
 import logging
 
+class MyAccount:
+
+    def __init__(self,dbaccount):
+        self.mname = dbaccount.name
+        self.mdescription = dbaccount.description
+        self.mcurrencyname = dbaccount.currencyname
+        self.mliquiditytype = dbaccount.liquiditytype
+        self.maccounttype  = dbaccount.accounttype
+
+    def ID(self):
+        return self.mname
+
 class Account(ndb.Model):
     """A main model for representing an account."""
     name          = ndb.StringProperty(indexed=True)
@@ -71,6 +83,20 @@ class CurrencyChange(ndb.Model):
         self.value = params[2]
         self.date = dateload(params[3])
 
+        #
+        #
+        #
+        
+class MyMoneyMove:
+    def __init__(self,dbmoneymove):
+        self.maccount     = dbmoneymove.account
+        self.mpayee       = dbmoneymove.payee
+        self.mvalue       = dbmoneymove.value
+        self.mdate        = datedumponlyandroid(dbmoneymove.date)
+
+    def ID(self):
+        return self.maccount + self.mpayee + self.mvalue + self.mdate
+        
 class MoneyMove(ndb.Model):
     """A main model for representing an account update."""
     account       = ndb.StringProperty(indexed=True)
@@ -84,8 +110,17 @@ class MoneyMove(ndb.Model):
         self.payee = params[1]
         self.value = params[2]
         self.date = dateload(params[3])
-    
 
+        #
+        #
+        #
+class MyPayeeCategory:
+    def __init__(self,dbpayeecategory):
+        self.mname     = dbpayeecategory.name
+
+    def ID(self):
+        return self.mname
+        
 class PayeeCategory(ndb.Model):
     """A main model for representing a payee category"""
     name   = ndb.StringProperty(indexed=True)
@@ -94,6 +129,18 @@ class PayeeCategory(ndb.Model):
     def load(self,params):
         self.name = params[0]
 
+        #
+        #
+        #
+class MyPayee:
+    def __init__(self,dbpayee):
+        self.mname     = dbpayee.name
+        self.mcategory = dbpayee.category
+
+    def ID(self):
+        return self.mname
+
+        
 class Payee(ndb.Model):
     """A main model for representing a payee."""
     name       = ndb.StringProperty(indexed=True)

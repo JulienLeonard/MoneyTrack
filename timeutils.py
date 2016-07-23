@@ -67,6 +67,15 @@ def datedump(date):
 def datedumponly(date):
     return date.strftime("%d %b %Y")
 
+def datedumponlyandroid(date):
+    return date.strftime("%Y%m%d")
+
+def dateloadandroid(sdate):
+    return datetime.datetime.strptime(sdate,"%Y%m%d")
+
+def dateloadonlyandroid(sdate):
+    return datetime.datetime.strptime(sdate,"%d %m %Y")
+
 def dateload(sdate):
     return datetime.datetime.strptime(sdate,'%d %b %Y %H:%M:%S')
 

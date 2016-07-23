@@ -83,5 +83,19 @@ indexes:
 - kind: MoneyMove
   ancestor: yes
   properties:
+  - name: account
+  - name: date
+    direction: desc
+
+- kind: MoneyMove
+  ancestor: yes
+  properties:
+  - name: date
+    direction: desc
+
+- kind: MoneyMove
+  ancestor: yes
+  properties:
+  - name: payee
   - name: date
     direction: desc

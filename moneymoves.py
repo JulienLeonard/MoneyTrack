@@ -24,17 +24,6 @@ def moneymovehandlers():
             ('/deletemoneymove/(.*)',    DeleteMoneyMove),
             ('/editmoneymove/(.*)',    EditMoneyMove),
             ('/doeditmoneymove/(.*)',    DoEditMoneyMove)]
-
-def addmoneymove(request,account,payee,value,date):
-    dict_name = request.request.get('dict_name', USERDICT)
-    omoneymove = MoneyMove(parent=dict_key(dict_name))
-    omoneymove.account     = account
-    omoneymove.payee       = payee
-    omoneymove.value       = value
-    if not date == None:
-        omoneymove.date        = dayload(date)
-    omoneymove.put()
-    return omoneymove
                 
     
 # [START ListMoneymove]
