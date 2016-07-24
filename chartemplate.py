@@ -1,6 +1,6 @@
 charttemplate = """<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <script src="http://code.highcharts.com/highcharts.js"></script>
-<div id="%CONTAINER%" style="height: 300px"></div>
+<div id="%CONTAINER%" style="height: 750px"></div>
 <script>
 $(function () {
     $('#%CONTAINER%').highcharts({

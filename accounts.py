@@ -11,6 +11,7 @@ from htmlutils        import *
 from utils            import *
 from timeutils        import *
 from admin            import *
+from chartemplate   import *
 
 def accounthandlers():
     # return [('/listaccounts',       ListAccounts),
@@ -21,6 +22,7 @@ def accounthandlers():
     return [('/listaccounts',       ListAccounts),
             ('/listaccountaccountstatus/(.*)',   ListAccountAccountStatus),
             ('/listaccountinvestsum/(.*)',       ListAccountInvestSum),
+            ('/viewaccount/(.*)', ViewAccount),
             ('/addaccount',         AddAccount),
             ('/doaddaccount',       DoAddAccount)]
                 
@@ -158,3 +160,55 @@ class ListAccountInvestSum(webapp2.RequestHandler):
             content.append(htmllink(url,url_linktext))
         
         writehtmlresponse(self,htmlcenter(content))
+
+# [START ViewAccount]
+class ViewAccount(webapp2.RequestHandler):
+    def get(self,accountid):
+        user = users.get_current_user()
+        content = []
+        if user:
+            if user.email() in myemails():
+
+                dict_name      = self.request.get('dict_name',USERDICT)
+                account_key = ndb.Key(urlsafe=accountid)
+                account = account_key.get()
+
+                smonths = {}
+                
+                for accountstatus in getaccountstatussforaccount(self,account.name):
+                    # smonth  = accountstatus.date.strftime("%Y%m")
+                    week = accountstatus.date.isocalendar()[1]
+                    if week == 53:
+                        week = 0
+                    smonth = accountstatus.date.strftime("%Y") + str(week).zfill(2)
+                    if not smonth in smonths:
+                        smonths[smonth] = []
+                    smonths[smonth].append((accountstatus.date.strftime("%Y%m%d"),float(accountstatus.value)))
+
+                for smonth in sorted(smonths.keys()):
+                    # smonths[smonth] = float(sum([v[-1] for v in smonths[smonth]]))/float(len(smonths[smonth]))
+                    smonths[smonth] = sorted(smonths[smonth])[-1][-1]
+                    # lastaccountvalues[account] = smonths[smonth][account]
+
+                values = {}
+                for smonth in sorted(smonths.keys()):
+                    values[smonth] = smonths[smonth]
+                    
+                content.append(html("h1","Account " + account.name))
+                content.append("<hr>")
+
+                ssmonths = ["\"" + smonth + "\"" for smonth in sorted(smonths.keys())]
+                values = [str(values[smonth]) for smonth in sorted(smonths.keys())]
+
+                CONTAINER = "accounthistory"
+                TITLE = "Account " + account.name + " History"
+                CATEGORIES = ",".join(ssmonths)
+                YAXIS = "SGD"
+                NAME = account.name
+                DATA = ",".join(values)
+                content.append(charttemplate.replace('%CONTAINER%',CONTAINER).replace('%TITLE%',TITLE).replace('%CATEGORIES%',CATEGORIES).replace('%YAXIS%',YAXIS).replace('%NAME%',NAME).replace('%DATA%',DATA))
+
+                content.append("<hr>")
+                
+        content = htmlcenter(content)
+        writehtmlresponse(self,content)

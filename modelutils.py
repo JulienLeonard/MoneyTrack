@@ -34,6 +34,17 @@ def addinvestsum(request,account,value,date):
     oinvestsum.put()
     return oinvestsum
 
+def addaccountstatus(request,account,value,date):
+    dict_name = request.request.get('dict_name', USERDICT)
+    oaccountstatus = AccountStatus(parent=dict_key(dict_name))
+    oaccountstatus.account   = account
+    oaccountstatus.value     = value
+    if not date == None:
+        oaccountstatus.date      = dayload(date)
+    oaccountstatus.put()
+    return oaccountstatus
+
+
 def getallactiveaccounts(request):
     dict_name = request.request.get('dict_name', USERDICT)
     return Account.query(ancestor=dict_key(dict_name)).filter(Account.accounttype == "Active").order(-Account.name)
@@ -141,7 +152,7 @@ def getlastcurrencychange(request,currency1,currency2):
 
 def datastring():
     content = []
-    for klass in [Account,Currency,LiquidityType,AccountType,Payee,PayeeCategory,Payer,PayerCategory,MoneyTransfer,AccountStatus,CurrencyChange,MoneyMove]:
+    for klass in [Account,Currency,LiquidityType,AccountType,Payee,PayeeCategory,Payer,PayerCategory,MoneyTransfer,AccountStatus,CurrencyChange,MoneyMove,InvestSum]:
         content.append(klass.__name__)
         for instance in klass.query():
             content.append("--- " + instance.string())
@@ -290,3 +301,18 @@ def getaccountROIdays(request,account):
 
     return float(int((365.0/longestdays) * (incall / ssum) * 10000.0))/100.0
 
+def getlastchanges(request):
+    changes         = {}
+                
+    totalcurrencies = getallcurrencys(request)
+    for currency1 in totalcurrencies:
+        for currency2 in totalcurrencies:
+            if currency1.name == currency2.name:
+                changes[(currency1.name,currency2.name)] = 1.0
+            else:
+                if (currency2.name,currency1.name) in changes:
+                    changes[(currency1.name,currency2.name)] = 1/changes[(currency2.name,currency1.name)]
+                else:
+                    # get last corresponding currencychange available
+                    changes[(currency1.name,currency2.name)] = getlastcurrencychange(request,currency1.name,currency2.name)
+    return changes

@@ -14,6 +14,10 @@ ADD_ACCOUNTSTATUS_TEMPLATE = """\
             <td>Value</td>
             <td><div><textarea name="accountstatusvalue"  rows="1" cols="40"></textarea></div></td>
          </tr>
+         <tr>
+            <td>Date</td>
+            <td><div><textarea name="accountstatusdate"  rows="1" cols="40">%NOW%</textarea></div></td>
+         </tr>
       </table>
       <hr>
       <div><input type="submit" value="Add"></div>

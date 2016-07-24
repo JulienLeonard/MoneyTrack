@@ -22,18 +22,6 @@ def accountstatushandlers():
             ('/addaccountstatus',         AddAccountStatus),
             ('/doaddaccountstatus',       DoAddAccountStatus),
             ('/deleteaccountstatus/(.*)',  DeleteAccountStatus)]
-
-
-def addaccountstatus(request,account,value,date):
-    dict_name = request.request.get('dict_name', USERDICT)
-    oaccountstatus = AccountStatus(parent=dict_key(dict_name))
-    oaccountstatus.account   = account
-    oaccountstatus.value     = value
-    if not date == None:
-        oaccountstatus.date      = date
-    oaccountstatus.put()
-    return oaccountstatus
-
     
 # [START ListAccountstatus]
 class ListAccountStatuss(webapp2.RequestHandler):
@@ -72,7 +60,7 @@ class AddAccountStatus(webapp2.RequestHandler):
                 curlist       = ["<option value=\""+ c + "\">" + c + "</option>" for c in curnames]
                 htmlaccounts  = "\n".join(curlist)
 
-                content.append(ADD_ACCOUNTSTATUS_TEMPLATE.replace("%HTMLACCOUNTS%",htmlaccounts))
+                content.append(ADD_ACCOUNTSTATUS_TEMPLATE.replace("%HTMLACCOUNTS%",htmlaccounts).replace("%NOW%",datedumponly(localnow())))
             else:
                 content = ['Not Authorized']
                 url_linktext = 'Logout'
@@ -91,7 +79,8 @@ class DoAddAccountStatus(webapp2.RequestHandler):
     def post(self):
         accountstatusaccount   = self.request.get('accountstatusaccount')
         accountstatusvalue     = self.request.get('accountstatusvalue')
-        accountstatus = addaccountstatus(self,accountstatusaccount,accountstatusvalue,None)
+        accountstatusdate      = self.request.get('accountstatusdate')
+        accountstatus = addaccountstatus(self,accountstatusaccount,accountstatusvalue,accountstatusdate)
         self.redirect("/listaccountstatuss")
 # [END DoAddChiChar]
 
